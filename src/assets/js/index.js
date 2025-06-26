@@ -38,7 +38,7 @@ class Splash {
 	async start() {
 		let splashes = [{
 			"message": "Battly Launcher",
-			"author": "TECNO BROS"
+			"author": "BATTLY STUDIOS"
 		},]
 
 		console.log(document.getElementById("version_id"));
