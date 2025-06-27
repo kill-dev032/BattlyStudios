@@ -28,157 +28,63 @@ let dev = process.env.NODE_ENV === "dev";
 let selectedAccount;
 app.setAppUserModelId("Battly Launcher");
 
-const notifier = require("node-notifier");
 
-const { Menu, Tray } = require("electron");
+const notifier = require('node-notifier');
+
+const { Menu, Tray } = require('electron');
 
 let tray = null;
 let isPlaying = false;
 
 app.whenReady().then(() => {
-  tray = new Tray(path.join(__dirname, "/assets/images/icon.png"));
+  tray = new Tray(path.join(__dirname, '/assets/images/icon.png'));
   updateTrayMenu(); // Actualizar menú inicialmente
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: "Battly Launcher",
-      type: "normal",
-      icon: path.join(__dirname, "/assets/images/icon15px.png"),
-      click: () => {
+      label: 'Battly Launcher', type: 'normal', icon: path.join(__dirname, '/assets/images/icon15px.png'), click: () => {
         const MainWindow = require("./assets/js/windows/mainWindow.js");
-        MainWindow.getWindow().show();
-      },
+        MainWindow.getWindow().show()
+      }
     },
-    { type: "separator" },
+    { type: 'separator' },
+    { label: 'Abrir carpeta de Battly', type: 'normal', click: () => { AbrirCarpeta(); } },
     {
-      label: "Abrir carpeta de Battly",
-      type: "normal",
-      click: () => {
-        AbrirCarpeta();
-      },
+      label: 'Battly Music', type: 'submenu', submenu: [
+        { label: 'Reproducir/Pausar', type: 'normal', click: () => { PlayPause(); } },
+        { label: 'Siguiente', type: 'normal', click: () => { NextMusic(); } },
+        { label: 'Anterior', type: 'normal', click: () => { PrevMusic(); } },
+      ]
     },
-    {
-      label: "Battly Music",
-      type: "submenu",
-      submenu: [
-        {
-          label: "Reproducir/Pausar",
-          type: "normal",
-          click: () => {
-            PlayPause();
-          },
-        },
-        {
-          label: "Siguiente",
-          type: "normal",
-          click: () => {
-            NextMusic();
-          },
-        },
-        {
-          label: "Anterior",
-          type: "normal",
-          click: () => {
-            PrevMusic();
-          },
-        },
-      ],
-    },
-    { type: "separator" },
-    {
-      label: "Discord",
-      type: "normal",
-      click: () => {
-        shell.openExternal("https://discord.gg/tecno-bros-885235460178342009");
-      },
-    },
-    {
-      label: "Sitio web",
-      type: "normal",
-      click: () => {
-        shell.openExternal("https://battlylauncher.com");
-      },
-    },
-    { type: "separator" },
-    {
-      label: "Cerrar Battly",
-      type: "normal",
-      click: () => {
-        app.quit();
-      },
-    },
+    { type: 'separator' },
+    { label: 'Discord', type: 'normal', click: () => { shell.openExternal('https://discord.gg/tecno-bros-885235460178342009'); } },
+    { label: 'Sitio web', type: 'normal', click: () => { shell.openExternal('https://battlylauncher.com'); } },
+    { type: 'separator' },
+    { label: 'Cerrar Battly', type: 'normal', click: () => { app.quit(); } },
   ]);
-  tray.setToolTip("Battly Launcher");
+  tray.setToolTip('Battly Launcher');
   tray.setContextMenu(contextMenu);
 });
 
 // Función para actualizar el menú de la bandeja dependiendo del estado de reproducción
 function updateTrayMenu() {
-  const playPauseLabel = isPlaying ? "Pausar" : "Reproducir";
+  const playPauseLabel = isPlaying ? 'Pausar' : 'Reproducir';
   const contextMenu = Menu.buildFromTemplate([
+    { label: 'Battly Launcher', type: 'normal', icon: path.join(__dirname, '/assets/images/icon15px.png') },
+    { type: 'separator' },
+    { label: 'Abrir carpeta de Battly', type: 'normal', click: () => { AbrirCarpeta(); } },
     {
-      label: "Battly Launcher",
-      type: "normal",
-      icon: path.join(__dirname, "/assets/images/icon15px.png"),
+      label: 'Battly Music', type: 'submenu', submenu: [
+        { label: playPauseLabel, type: 'normal', click: () => { PlayPause(); } },
+        { label: 'Siguiente', type: 'normal', click: () => { NextMusic(); } },
+        { label: 'Anterior', type: 'normal', click: () => { PrevMusic(); } },
+      ]
     },
-    { type: "separator" },
-    {
-      label: "Abrir carpeta de Battly",
-      type: "normal",
-      click: () => {
-        AbrirCarpeta();
-      },
-    },
-    {
-      label: "Battly Music",
-      type: "submenu",
-      submenu: [
-        {
-          label: playPauseLabel,
-          type: "normal",
-          click: () => {
-            PlayPause();
-          },
-        },
-        {
-          label: "Siguiente",
-          type: "normal",
-          click: () => {
-            NextMusic();
-          },
-        },
-        {
-          label: "Anterior",
-          type: "normal",
-          click: () => {
-            PrevMusic();
-          },
-        },
-      ],
-    },
-    { type: "separator" },
-    {
-      label: "Discord",
-      type: "normal",
-      click: () => {
-        shell.openExternal("https://discord.gg/tecno-bros-885235460178342009");
-      },
-    },
-    {
-      label: "Sitio web",
-      type: "normal",
-      click: () => {
-        shell.openExternal("https://battlylauncher.com");
-      },
-    },
-    { type: "separator" },
-    {
-      label: "Cerrar Battly",
-      type: "normal",
-      click: () => {
-        app.quit();
-      },
-    },
+    { type: 'separator' },
+    { label: 'Discord', type: 'normal', click: () => { shell.openExternal('https://discord.gg/tecno-bros-885235460178342009'); } },
+    { label: 'Sitio web', type: 'normal', click: () => { shell.openExternal('https://battlylauncher.com'); } },
+    { type: 'separator' },
+    { label: 'Cerrar Battly', type: 'normal', click: () => { app.quit(); } },
   ]);
   tray.setContextMenu(contextMenu);
 }
@@ -201,6 +107,7 @@ async function NextMusic() {
   window.webContents.send("next--song");
   window.webContents.send("next");
 }
+
 
 ipcMain.on("next", async () => {
   const window = MainWindow.getWindow();
@@ -228,24 +135,23 @@ socket.on("connect", () => {
 socket.on("notificacion", async (data) => {
   const { titulo, descripcion, url } = data;
 
-  notifier.notify(
-    {
-      title: titulo,
-      message: descripcion,
-      icon: path.join(__dirname, "/assets/images/icon.png"),
-      sound: true,
-      wait: true,
-      actions: ["Abrir"],
-      appID: "Battly Launcher",
-    },
-    function (err, response, metadata) {
-      if (metadata.activationType === "Abrir") {
-        console.log("Abriendo URL:", url);
-        shell.openExternal(url);
-      }
+  notifier.notify({
+    title: titulo,
+    message: descripcion,
+    icon: path.join(__dirname, '/assets/images/icon.png'),
+    sound: true,
+    wait: true,
+    actions: ['Abrir'],
+    appID: 'Battly Launcher',
+  }, function (err, response, metadata) {
+    if (metadata.activationType === "Abrir") {
+      console.log("Abriendo URL:", url);
+      shell.openExternal(url);
     }
-  );
+  });
 });
+
+
 
 ipcMain.on("select-account", async (event, data) => {
   selectedAccount = data;
@@ -255,38 +161,36 @@ socket.on("solicitudAmistad", async (data) => {
   const { username } = data;
 
   try {
-    notifier.notify(
-      {
-        title: "Solicitud de amistad",
-        message: `${username} te ha enviado una solicitud de amistad.`,
-        icon: path.join(__dirname, "/assets/images/icon.png"),
-        sound: true,
-        wait: true,
-        actions: ["Aceptar", "Rechazar"],
-        appID: "Battly Launcher",
-      },
-      (event, arg, metadata) => {
-        if (arg === "aceptar") {
-          socket.emit("aceptarSolicitud", {
-            username: selectedAccount.name,
-            solicitud: username,
-            password: selectedAccount.password,
-          });
-        } else {
-          socket.emit("rechazarSolicitud", {
-            username: selectedAccount.name,
-            solicitud: username,
-            password: selectedAccount.password,
-          });
-        }
+    notifier.notify({
+      title: 'Solicitud de amistad',
+      message: `${username} te ha enviado una solicitud de amistad.`,
+      icon: path.join(__dirname, '/assets/images/icon.png'),
+      sound: true,
+      wait: true,
+      actions: ['Aceptar', 'Rechazar'],
+      appID: 'Battly Launcher',
+    }, (event, arg, metadata) => {
+      if (arg === "aceptar") {
+        socket.emit("aceptarSolicitud", {
+          username: selectedAccount.name,
+          solicitud: username,
+          password: selectedAccount.password,
+        });
+      } else {
+        socket.emit("rechazarSolicitud", {
+          username: selectedAccount.name,
+          solicitud: username,
+          password: selectedAccount.password,
+        });
       }
-    );
+    });
   } catch (error) {
     console.error("Error al mostrar la notificación:", error);
   }
 });
 
-app.on("open-url", function (event, urlToOpen) {
+
+app.on('open-url', function (event, urlToOpen) {
   event.preventDefault();
 
   const parsedUrl = url.parse(urlToOpen, true);
@@ -319,9 +223,8 @@ socket.on("getLogs", async (data) => {
     );
     const window = MainWindow.getWindow();
     window.webContents.send("getLogsAnterior", { RegistroLog });
-
-    const registryConvertedToBase64 =
-      Buffer.from(RegistroLog).toString("base64");
+    
+    const registryConvertedToBase64 = Buffer.from(RegistroLog).toString("base64");
     socket.emit("sendLogs", registryConvertedToBase64);
   } else {
     const { user, razon } = data;
@@ -338,10 +241,7 @@ ipcMain.on("obtenerLogs", async (event, data) => {
   let dataJSON = JSON.stringify(data);
   let dataConvertedToBase64 = Buffer.from(dataJSON).toString("base64");
   let registryConvertedToBase64 = Buffer.from(RegistroLog).toString("base64");
-  socket.emit("sendLogs", {
-    userData: dataConvertedToBase64,
-    logs: registryConvertedToBase64,
-  });
+  socket.emit("sendLogs", { userData: dataConvertedToBase64, logs: registryConvertedToBase64 });
   shown = true;
 });
 
@@ -604,37 +504,6 @@ ipcMain.handle("update-app", () => {
           message: error,
         });
       });
-  });
-});
-
-const pkgVersion = async () => {
-  let data = await fs.readFileSync("package.json");
-  return JSON.parse(data);
-};
-ipcMain.handle("update-new-app", async () => {
-  console.log(await pkgVersion());
-
-  return new Promise(async (resolve, reject) => {
-    fetch("https://api.battlylauncher.com/launcher/config-launcher/config.json").then(async res => {
-      let data = await res.json();
-      let version = data.battly.release;
-
-      let actualBuild = (await pkgVersion()).buildVersion;
-
-      if (actualBuild != version.latest_build) {
-        resolve();
-        const updateWindow = UpdateWindow.getWindow();
-        if (updateWindow) updateWindow.webContents.send("updateNewAvailable");
-      } else {
-        reject();
-      }
-    }).catch((error) => {
-      console.log(error);
-      resolve({
-        error: true,
-        message: error,
-      });
-    });
   });
 });
 

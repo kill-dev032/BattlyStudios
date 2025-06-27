@@ -32,8 +32,10 @@ async function createWindow() {
     minWidth: 980,
     minHeight: 552,
     resizable: true,
-    icon: `./src/assets/images/icon.${os.platform() === "win32" ? "ico" : "png"
-      }`,
+    icon: `./src/assets/images/icon.${
+      os.platform() === "win32" ? "ico" : "png"
+    }`,
+    transparent: true,
     frame: false,
     show: false,
     webPreferences: {
@@ -52,8 +54,9 @@ async function createWindow() {
     resizable: false,
     x: electron.screen.getPrimaryDisplay().workAreaSize.width - 370,
     y: electron.screen.getPrimaryDisplay().workAreaSize.height - 220,
-    icon: `./src/assets/images/icon.${os.platform() === "win32" ? "ico" : "png"
-      }`,
+    icon: `./src/assets/images/icon.${
+      os.platform() === "win32" ? "ico" : "png"
+    }`,
     transparent: true,
     frame: false,
     show: false,
@@ -71,8 +74,9 @@ async function createWindow() {
     minWidth: 853,
     minHeight: 480,
     resizable: true,
-    icon: `./src/assets/images/icon.${os.platform() === "win32" ? "ico" : "png"
-      }`,
+    icon: `./src/assets/images/icon.${
+      os.platform() === "win32" ? "ico" : "png"
+    }`,
     transparent: true,
     frame: false,
     show: false,

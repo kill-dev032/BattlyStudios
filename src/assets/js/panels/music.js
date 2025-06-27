@@ -7,27 +7,39 @@ import { database, changePanel, addAccount, accountSelect } from '../utils.js';
 const Swal = require('./assets/js/libs/sweetalert/sweetalert2.all.min.js');
 const usetube = require('./assets/js/libs/youtube/usetube');
 
-const ytdl = require('@distube/ytdl-core');
+const ytdl = require('ytdl-core');
 
 const dataDirectory = `${process.env.APPDATA || (process.platform == 'darwin' ? `${process.env.HOME}/Library/Application Support` : process.env.HOME)}/.battly`
 const fs = require('fs');
 
-let musicList_ = [];
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 5000,
+  timerProgressBar: false,
+  didOpen: (toast) => {
+    toast.addEventListener('mouseenter', Swal.stopTimer)
+    toast.addEventListener('mouseleave', Swal.resumeTimer)
+  },
+});
+
+let musicList_ = [];       
 import { Lang } from "../utils/lang.js";
 import { Alert } from "../utils/alert.js";
 let lang;
 
 class Music {
-  static id = "music";
-  async init(config) {
-    this.config = config
-    this.database = await new database().init();
-    this.lang = await new Lang().GetLang();
-    lang = this.lang;
-    this.load();
-    this.PlayLists();
+    static id = "music";
+    async init(config) {
+        this.config = config
+      this.database = await new database().init();
+      this.lang = await new Lang().GetLang();
+      lang = this.lang;
+      this.load();
+      this.PlayLists();
   }
-
+  
   async PlayLists() {
     if (!fs.existsSync(`${dataDirectory}`)) {
       fs.mkdirSync(`${dataDirectory}`);
@@ -48,7 +60,6 @@ class Music {
     if (!fs.existsSync(`${dataDirectory}/battly/launcher/music/playlists.json`)) {
       fs.writeFileSync(`${dataDirectory}/battly/launcher/music/playlists.json`, JSON.stringify([]));
     }
-
 
     document.getElementById("save-playlist").addEventListener("click", async () => {
       let playlistsFile = await fs.readFileSync(`${dataDirectory}/battly/launcher/music/playlists.json`, 'utf8');
@@ -159,15 +170,17 @@ class Music {
         modalDiv.remove();
       });
 
+      // Crear el elemento button con la clase "button is-danger" y texto "Cancelar", y agregarlo al div footer
       const cancelButton = document.createElement('button');
       cancelButton.className = 'button is-danger';
       cancelButton.textContent = lang.cancel;
       footerDiv.appendChild(cancelButton);
-
+      
       cancelButton.addEventListener('click', () => {
         modalDiv.remove();
       });
 
+      // Agregar el div principal al cuerpo del documento
       document.body.appendChild(modalDiv);
     });
   }
@@ -219,20 +232,17 @@ class Music {
       const bodySection = document.createElement('section');
       bodySection.className = 'modal-card-body';
       bodySection.style.backgroundColor = '#212121';
-      bodySection.style.color = '#fff !important';
+      bodySection.style.color = '#fff';
       modalCardDiv.appendChild(bodySection);
 
       // Crear el elemento p con el mensaje de bienvenida y agregarlo al div section
       const welcomeP = document.createElement('p');
       welcomeP.innerHTML = lang.welcome_to_the_new_playlists_system;
-      welcomeP.style.color = '#fff';
       bodySection.appendChild(welcomeP);
 
       for (let playlist of playlists) {
         const cardDiv = document.createElement('div');
         cardDiv.className = 'card';
-        cardDiv.style.color = '#fff';
-        cardDiv.style.backgroundColor = '#323232';
         bodySection.appendChild(cardDiv);
 
         // Crear el elemento header con la clase "card-header is-flex" y agregarlo al div card
@@ -243,7 +253,6 @@ class Music {
         // Crear el elemento p con la clase "card-header-title" y texto "Playlist 1", y agregarlo al div card-header
         const cardTitleP = document.createElement('p');
         cardTitleP.className = 'card-header-title';
-        cardTitleP.style.color = '#fff';
         cardTitleP.textContent = playlist.name;
         cardHeaderDiv.appendChild(cardTitleP);
 
@@ -251,14 +260,12 @@ class Music {
         const buttonsDiv = document.createElement('div');
         buttonsDiv.className = 'buttons';
         buttonsDiv.style.marginRight = '5px';
-        buttonsDiv.style.marginBottom = "0px";
         cardHeaderDiv.appendChild(buttonsDiv);
 
         // Crear el elemento button con la clase "button is-info" y estilo de margen derecho, y agregarlo al div buttons
         const playButton = document.createElement('button');
-        playButton.className = 'button is-info is-outlined';
+        playButton.className = 'button is-info';
         playButton.style.marginRight = '0px';
-        playButton.style.marginBottom = "0px";
         buttonsDiv.appendChild(playButton);
 
         playButton.addEventListener('click', async () => {
@@ -320,15 +327,13 @@ class Music {
             paragraph.innerText = `${lang.getting} ${song.name} (${newMusicList.length}/${playlist.songs.length})`;
             await ytdl.getInfo(song.url, { quality: 'highestaudio' })
               .then(info => {
-                console.log(info)
                 const audioFormat = info.formats.find(format => format.mimeType.includes('audio/mp4'));
-                console.log(audioFormat)
-
+      
                 if (!audioFormat) {
                   console.error("No se encontró un formato de audio adecuado");
                   return;
                 }
-
+      
                 const audioUrl = audioFormat.url;
 
                 newMusicList.push({
@@ -340,7 +345,7 @@ class Music {
                   duration: song.duration
                 });
 
-
+                
 
                 const resultsDiv = document.getElementById("playlist");
                 let i = 1;
@@ -350,7 +355,7 @@ class Music {
                   musicList_ = newMusicList;
 
                   document.getElementById("playlist").innerHTML = "";
-
+  
                   // Mapear el array original para mantener el orden
                   const orderedMusicList = playlist.songs.map((song, index) => {
                     const music = musicList_.find(item => item.name === song.name);
@@ -363,9 +368,9 @@ class Music {
 
                     const duration = music.duration.split(":").reduce((acc, time) => (60 * acc) + +time);
                     const minutes = Math.floor(duration / 60);
-                    const seconds = duration % 60;
-                    const formattedSeconds = seconds < 10 ? "0" + seconds : seconds;
-                    const durationString = minutes + ":" + formattedSeconds;
+          const seconds = duration % 60;
+          const formattedSeconds = seconds < 10 ? "0" + seconds : seconds;
+          const durationString = minutes + ":" + formattedSeconds;
 
                     const cardDiv = document.createElement("div");
                     cardDiv.classList.add("playlist-song");
@@ -393,7 +398,6 @@ class Music {
                     const button = document.createElement("button");
                     button.classList.add("button");
                     button.classList.add("is-danger");
-                    button.classList.add("is-outlined");
                     button.classList.add("playlist-song-button");
                     button.innerHTML = '<i class="fa-solid fa-trash"></i>'
 
@@ -409,13 +413,13 @@ class Music {
                       button.classList.remove("is-loading");
                       button.classList.remove("is-info");
                       button.classList.add("is-success");
-
+        
                       setTimeout(() => {
                         button.classList.remove("is-success");
                         button.classList.add("is-danger");
                       }, 2000);
                     });
-
+                      
                     cardDiv.appendChild(button);
                     resultsDiv.appendChild(cardDiv);
                   }
@@ -429,13 +433,14 @@ class Music {
           }, 5000);
         });
 
+        // Crear el elemento span con el ícono de reproducción y agregarlo al botón playButton
         const playIconSpan = document.createElement('span');
         playIconSpan.innerHTML = '<i class="fa-solid fa-play"></i>';
         playButton.appendChild(playIconSpan);
 
+        // Crear el elemento button con la clase "button is-danger", y agregarlo al div buttons
         const deleteButton = document.createElement('button');
-        deleteButton.className = 'button is-danger is-outlined';
-        deleteButton.style.marginBottom = "0px";
+        deleteButton.className = 'button is-danger';
         buttonsDiv.appendChild(deleteButton);
 
         deleteButton.addEventListener('click', () => {
@@ -463,12 +468,18 @@ class Music {
       }
       document.body.appendChild(modalDiv);
     });
-
+      
     let sortable = new Sortable(document.getElementById('playlist'), {
-      animation: 250,
-      ghostClass: 'seleccionado',
-      chosenClass: 'seleccionado',
+      animation: 250, // Duración de la animación en milisegundos
+      ghostClass: 'seleccionado', // Clase de estilo para el elemento seleccionado
+      chosenClass: 'seleccionado', // Clase de estilo para el elemento elegido
     });
+
+    const playlistAudio = document.getElementById("main-audio");
+
+        
+
+        
 
     document.getElementById("return-btn").addEventListener("click", () => {
       changePanel("home");
@@ -484,23 +495,28 @@ class Music {
       mainAudio = document.getElementById("main-audio"),
       progressArea = document.getElementById("music-panel-progress"),
       progressBar = progressArea.querySelector(".progress-bar");
-
-
-
-
-
-
+    
+      
+          
+      
+          
+      
     function playAudioFromVideoId(videoId) {
       ytdl.getInfo(videoId, { quality: 'highestaudio' })
         .then(info => {
           const audioFormat = info.formats.find(format => format.mimeType.includes('audio/mp4'));
-
+      
           if (!audioFormat) {
             console.error("No se encontró un formato de audio adecuado");
             return;
           }
-
+      
           const audioUrl = audioFormat.url;
+      
+          /* formato: { name: "Nice piano and ukulele", author: "Royalty", img: "https://www.bensound.com/bensound-img/buddy.jpg", audio: "https://www.bensound.com/bensound-music/bensound-buddy.mp3", duration: "2:02" },
+          */
+      
+          //convertir a minutos:segundos
           const duration = info.videoDetails.lengthSeconds;
           const minutes = Math.floor(duration / 60);
           const seconds = duration % 60;
@@ -515,7 +531,7 @@ class Music {
             audio: audioUrl,
             duration: durationString
           });
-
+      
           addMusicToPlaylist(musicList_.length);
         })
         .catch(error => {
@@ -584,7 +600,7 @@ class Music {
 
           const titleP = document.createElement("p");
           titleP.classList.add("search-song-title");
-          if (title.length > 70) {
+          if(title.length > 70) {
             titleP.innerText = title.substring(0, 70) + "...";
           } else {
             titleP.innerText = title;
@@ -601,7 +617,6 @@ class Music {
           const button = document.createElement("button");
           button.classList.add("button");
           button.classList.add("is-info");
-          button.classList.add("is-outlined");
           button.classList.add("search-song-button");
           button.innerText = lang.add;
 
@@ -630,12 +645,12 @@ class Music {
               });
 
 
-
+                  
               const resultsDiv1 = document.getElementById("playlist");
               resultsDiv1.innerHTML = "";
 
               for (let music of musicList_) {
-
+                
                 const cardDiv1 = document.createElement("div");
                 cardDiv1.classList.add("playlist-song");
 
@@ -662,7 +677,6 @@ class Music {
                 const button1 = document.createElement("button");
                 button1.classList.add("button");
                 button1.classList.add("is-danger");
-                button1.classList.add("is-outlined");
                 button1.classList.add("playlist-song-button");
                 button1.innerHTML = '<i class="fa-solid fa-trash"></i>'
 
@@ -678,13 +692,13 @@ class Music {
                   button1.classList.remove("is-loading");
                   button1.classList.remove("is-info");
                   button1.classList.add("is-success");
-
+        
                   setTimeout(() => {
                     button1.classList.remove("is-success");
                     button1.classList.add("is-danger");
                   }, 2000);
                 });
-
+                      
                 cardDiv1.appendChild(button1);
                 resultsDiv1.appendChild(cardDiv1);
               }
@@ -702,10 +716,10 @@ class Music {
           });
 
           cardDiv.appendChild(button);
-
+                
 
           resultsDiv.appendChild(cardDiv);
-
+                  
         }
 
         btnSearch.disabled = false;
@@ -748,10 +762,10 @@ class Music {
       mainAudio.volume = value;
       localStorage.setItem("volume", value);
 
-      if (value === 0) {
+      if(value === 0) {
         volumeIcon.classList.remove("fa-volume-high");
         volumeIcon.classList.add("fa-volume-mute");
-      } else if (value > 0 && value <= 0.5) {
+      } else if(value > 0 && value <= 0.5) {
         volumeIcon.classList.remove("fa-volume-mute");
         volumeIcon.classList.add("fa-volume-low");
       } else {
@@ -774,7 +788,7 @@ class Music {
       }
     });
 
-
+      
 
     function addMusicToPlaylist(index) {
       const newMusic = musicList_[index - 1];
@@ -785,43 +799,42 @@ class Music {
         clicked(index);
       }
     }
-
-
-
+      
+      
+      
     const btnDownload = document.getElementById("reproducir-btn");
     btnDownload.addEventListener("click", () => {
       const songName = document.getElementById("nombre-de-cancion").value;
       searchAndShowResults(songName);
     });
-
-
-
-
-
+      
+      
+      
+      
+      
     let musicIndex = Math.floor((Math.random() * musicList_.length) + 1);
     let isMusicPaused = false;
-
+      
     window.addEventListener("load", () => {
       loadMusic(musicIndex);
       playingSong();
     });
-
+      
     function loadMusic(indexNumb) {
-      document.querySelector(".playing-song-title").style.height = "25px";
-      musicName.innerText = musicList_[indexNumb - 1].name;
-      musicAuthor.innerText = musicList_[indexNumb - 1].author.substring(0, 7) + "..";
+      musicName.innerText = musicList_[indexNumb - 1].name.substring(0, 20) + "...";
+      musicAuthor.innerText = musicList_[indexNumb - 1].author;
       musicImg.src = musicList_[indexNumb - 1].img;
       mainAudio.src = musicList_[indexNumb - 1].audio;
       localStorage.setItem("songPlaying", musicList_[indexNumb - 1]);
       document.getElementById("music-img").src = musicList_[indexNumb - 1].img;
-      document.getElementById("playing-now-body").innerText = musicList_[indexNumb - 1].name.substring(0, 30) + "...";
-
+      document.getElementById("playing-now-body").innerText = musicList_[indexNumb - 1].name.substring(0, 50) + "...";
+      
       fetch(`https://musicapi.battlylauncher.com/api/v1/play/${musicList_[indexNumb - 1].url}`);
       console.log(musicList_);
 
       ipcRenderer.send("set-song", musicList_[indexNumb - 1]);
     }
-
+      
     function playMusic() {
       wrapper.classList.add("paused");
       playPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
@@ -847,13 +860,13 @@ class Music {
     mainAudio.addEventListener("pause", () => {
       return pauseMusic1();
     });
-
+      
     function pauseMusic() {
       wrapper.classList.remove("paused");
       playPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
       mainAudio.pause();
     }
-
+      
     function prevMusic() {
       musicIndex--;
       musicIndex < 1 ? musicIndex = musicList_.length : musicIndex = musicIndex;
@@ -861,7 +874,7 @@ class Music {
       playMusic();
       playingSong();
     }
-
+    
     function nextMusic() {
       musicIndex++;
       musicIndex > musicList_.length ? musicIndex = 1 : musicIndex = musicIndex;
@@ -869,7 +882,7 @@ class Music {
       playMusic();
       playingSong();
     }
-
+      
     playPauseBtn.addEventListener("click", () => {
       if (!musicList_.length) return new Alert().ShowAlert({
         icon: 'warning',
@@ -880,11 +893,11 @@ class Music {
       isMusicPlay ? pauseMusic() : playMusic();
       playingSong();
     });
-
+      
     prevBtn.addEventListener("click", () => {
       prevMusic();
     });
-
+      
     nextBtn.addEventListener("click", () => {
       nextMusic();
     });
@@ -902,14 +915,14 @@ class Music {
     ipcRenderer.on('prev', () => {
       prevMusic();
     });
-
+      
     // update progress bar width according to music current time
     mainAudio.addEventListener("timeupdate", (e) => {
       const currentTime = e.target.currentTime;
       const duration = e.target.duration;
       let progressWidth = (currentTime / duration) * 100;
       progressBar.style.width = `${progressWidth}%`;
-
+      
       let musicCurrentTime = document.getElementById("current-time"),
         musicDuartion = document.getElementById("max-duration");
       mainAudio.addEventListener("loadeddata", () => {
@@ -930,18 +943,18 @@ class Music {
       }
       musicCurrentTime.innerText = `${currentMin}:${currentSec}`;
     });
-
+      
     // update playing song currentTime on according to the progress bar width
     progressArea.addEventListener("click", (e) => {
       let progressWidth = progressArea.clientWidth; //getting width of progress bar
       let clickedOffsetX = e.offsetX; //getting offset x value
       let songDuration = mainAudio.duration; //getting song total duration
-
+        
       mainAudio.currentTime = (clickedOffsetX / progressWidth) * songDuration;
       playMusic(); //calling playMusic function
       playingSong();
     });
-
+      
     //code for what to do after song ended
     mainAudio.addEventListener("ended", () => {
       if (musicList_.length !== 1) {
@@ -959,8 +972,8 @@ class Music {
         playingSong();
       }
     });
-
-
+      
+      
     const ulTag = wrapper.querySelector("ul");
     // let create li tags according to array length for list
     for (let i = 0; i < musicList_.length; i++) {
@@ -974,7 +987,7 @@ class Music {
                       <audio class="${musicList_[i].src}" src="${musicList_[i].audio}"></audio>
                     </li>`;
       ulTag.insertAdjacentHTML("beforeend", liTag); //inserting the li inside ul tag
-
+      
       let liAudioDuartionTag = ulTag.querySelector(`#${musicList_[i].src}`);
       let liAudioTag = ulTag.querySelector(`.${musicList_[i].src}`);
       liAudioTag.addEventListener("loadeddata", () => {
@@ -988,7 +1001,7 @@ class Music {
         liAudioDuartionTag.setAttribute("t-duration", `${totalMin}:${totalSec}`); //adding t-duration attribute with total duration value
       });
     }
-
+      
     //particular li clicked function
     function clicked(index) {
       musicIndex = index; // Actualiza el índice de la canción actual
